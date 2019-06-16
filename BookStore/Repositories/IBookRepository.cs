@@ -10,10 +10,9 @@ namespace BookStore.Repositories
     {
         //getbestbook
         IEnumerable<Book> GetAll();
-        Book GetById(object id);
+        Book GetById(int id);
         void Insert(Book book);
         void Update(Book book);
-        void Delete(object id);
-        void Save();
+        void Delete(int id);
     }
 }

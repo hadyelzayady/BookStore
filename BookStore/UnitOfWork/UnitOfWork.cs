@@ -19,6 +19,8 @@ namespace BookStore.UnitOfWork
 
         public IBookRepository BookRepository => _bookRepository = _bookRepository ?? new BookRepository(_bookStoreContext);
 
+        public BookStoreContext Context => throw new NotImplementedException();
+
         public void Save()
         {
             _bookStoreContext.SaveChanges();
