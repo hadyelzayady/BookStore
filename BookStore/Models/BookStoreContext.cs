@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Configuration;
 namespace BookStore.Models
 {
     public class BookStoreContext:DbContext
     {
+        private IConfiguration configuration;
 
-        public BookStoreContext()  { }
+        public BookStoreContext(IConfiguration configuration)  { this.configuration = configuration; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=localhost;Database=BookStore;Username=postgres;Password=12345");
+            => optionsBuilder.UseNpgsql(configuration.GetValue<string>("DBConnectionString")  );
         public DbSet<Book> Books { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<CategoryParent> CategoriesParents { get; set; }
