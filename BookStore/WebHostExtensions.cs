@@ -13,17 +13,9 @@ public static class ModelBuilderExtensions
             var services = scope.ServiceProvider;
             var context = services.GetService<BookStoreContext>();
 
-            // now we have the DbContext. Run migrations
             context.Database.Migrate();
 
-            // now that the database is up to date. Let's seed
              new CategoriesSeeders(context).SeedData();
-
-//#if DEBUG
-//            // if we are debugging, then let's run the test data seeder
-//            // alternatively, check against the environment to run this seeder
-//            new TestDataSeeder(context).SeedData();
-//#endif
         }
         return host;
     }
