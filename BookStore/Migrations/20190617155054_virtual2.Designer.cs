@@ -2,15 +2,17 @@
 using BookStore.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace BookStore.Migrations
 {
     [DbContext(typeof(BookStoreContext))]
-    partial class BookStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20190617155054_virtual2")]
+    partial class virtual2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,7 +25,7 @@ namespace BookStore.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("CategoryId");
+                    b.Property<int>("CategoryParentId");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -31,7 +33,7 @@ namespace BookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryParentId");
 
                     b.ToTable("Books");
                 });
@@ -61,24 +63,25 @@ namespace BookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("CategoryId", "ParentCategoryId");
-
                     b.HasIndex("ParentCategoryId");
+
+                    b.HasIndex("CategoryId", "ParentCategoryId")
+                        .IsUnique();
 
                     b.ToTable("CategoriesParents");
                 });
 
             modelBuilder.Entity("BookStore.Models.Book", b =>
                 {
-                    b.HasOne("BookStore.Models.CategoryParent", "Category")
+                    b.HasOne("BookStore.Models.CategoryParent", "CategoryParent")
                         .WithMany()
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("CategoryParentId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BookStore.Models.CategoryParent", b =>
                 {
-                    b.HasOne("BookStore.Models.Category", "SubCategory")
+                    b.HasOne("BookStore.Models.Category", "Category")
                         .WithMany("subCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);

@@ -9,21 +9,27 @@ namespace BookStore.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly BookStoreContext _bookStoreContext;
-        private IBookRepository _bookRepository;
+        public readonly BookStoreContext _bookStoreContext;
+        public IBookRepository BookRepository { get; set; }
 
         public UnitOfWork(BookStoreContext bookStoreContext)
         {
             _bookStoreContext = bookStoreContext;
+            BookRepository = new BookRepository(_bookStoreContext);
         }
-
-        public IBookRepository BookRepository => _bookRepository = _bookRepository ?? new BookRepository(_bookStoreContext);
-
-        public BookStoreContext Context => throw new NotImplementedException();
 
         public void Save()
         {
-            _bookStoreContext.SaveChanges();
+            _bookStoreContext.SaveChanges();   
+        }
+        public  Task<int> SaveAsync()
+        {
+            return  _bookStoreContext.SaveChangesAsync();
+        }
+        public void Dispose()
+        {
+             
+            _bookStoreContext.Dispose();
         }
     }
 }

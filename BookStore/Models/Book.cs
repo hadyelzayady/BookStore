@@ -13,8 +13,8 @@ namespace BookStore.Models
         [Required]
         [MaxLength(255)]
         public string Title { get; set; }
-        [ForeignKey("CategoryParent")]
-        public int CategoryParentId { get; set; }
-        public CategoryParent CategoryParent { get; set; }
+        public int CategoryId { get; set; }
+        [ForeignKey("CategoryId")]
+         public CategoryParent Category { get; set; }
     }
 }

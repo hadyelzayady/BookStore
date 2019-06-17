@@ -15,19 +15,18 @@ namespace BookStore.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        //this is so WROOOOOOOOOOOONG as bookrepos has another context other than unitofwork
-        private readonly UnitOfWork.UnitOfWork unitOfWork = new UnitOfWork.UnitOfWork(new BookStoreContext());
-        private IBookRepository bookRepository;
-        public BooksController(BookStoreContext context)
+        private readonly IUnitOfWork _unitOfWork;
+        public BooksController(IUnitOfWork unitOfWork)
         {
-            bookRepository = new BookRepository(context);
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/Books
         [HttpGet]
-        public IEnumerable<Book> GetBooks()
+        public async Task<IActionResult> GetBooks()
         {
-            return bookRepository.GetAll();
+            var books=await _unitOfWork.BookRepository.GetAll();
+            return Ok(books);
         }
 
         // GET: api/Books/5
@@ -40,92 +39,92 @@ namespace BookStore.Controllers
             }
 
             //var book = await _context.Books.FindAsync(id);
-            var book = bookRepository.GetById(id);
+            var book = await _unitOfWork.BookRepository.GetById(id);
             if (book == null)
             {
                 return NotFound();
             }
-
             return Ok(book);
         }
 
         // PUT: api/Books/5
         [HttpPut("{id}")]
-        public IActionResult PutBook([FromRoute] long id, [FromBody] Book book)
+        public async Task<IActionResult> PutBook([FromRoute] int id, [FromBody] Book book)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+            {
+                return  BadRequest(ModelState);
             }
 
             if (id != book.Id)
             {
                 return BadRequest();
             }
-
-            unitOfWork.Context.Entry(book).State = EntityState.Modified;
-
-            try
-            {
-                //await _context.SaveChangesAsync();
-                unitOfWork.Save();
+           
+                _unitOfWork.BookRepository.Update(book);
+                 var result=await _unitOfWork.SaveAsync();
+                 return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
-                if (!BookExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(500, "Internal server error");
             }
-
-            return NoContent();
+           
         }
 
         // POST: api/Books
         [HttpPost]
-        public IActionResult PostBook([FromBody] Book book)
+        public async Task<IActionResult >PostBook([FromBody] Book book)
         {
-            if (!ModelState.IsValid)
+            try
+            {
+                if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            //_context.Books.Add(book);
-            //await _context.SaveChangesAsync();
-            bookRepository.Insert(book);
-            unitOfWork.Save();
+            _unitOfWork.BookRepository.Insert(book);
+           
+            var result=await _unitOfWork.SaveAsync();
+            if (result == 0)
+                return BadRequest();
+             _unitOfWork.BookRepository.LoadBookCategory(book);
+             return CreatedAtAction("GetBook", new { id = book.Id }, book);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
 
-            return CreatedAtAction("GetBook", new { id = book.Id }, book);
         }
 
-        // DELETE: api/Books/5
+        //DELETE: api/Books/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook([FromRoute] long id)
+        public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
+                _unitOfWork.BookRepository.Delete(id);
+
+                var result = await _unitOfWork.SaveAsync();
+                if (result == 0)
+                {
+                    return NotFound();
+                }
+                return Ok();
+            }catch
             {
-                return NotFound();
+                return  StatusCode(500, "Internal server error");
             }
-
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
-
-            return Ok(book);
+           
         }
 
-        private bool BookExists(long id)
-        {
-            return _context.Books.Any(e => e.Id == id);
-        }
     }
 }

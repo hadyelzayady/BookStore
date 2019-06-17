@@ -9,10 +9,11 @@ namespace BookStore.Repositories
     public interface IBookRepository
     {
         //getbestbook
-        IEnumerable<Book> GetAll();
-        Book GetById(int id);
+        Task<List<Book>> GetAll();
+        Task<Book> GetById(int id);
         void Insert(Book book);
         void Update(Book book);
+        void LoadBookCategory(Book book);
         void Delete(int id);
     }
 }

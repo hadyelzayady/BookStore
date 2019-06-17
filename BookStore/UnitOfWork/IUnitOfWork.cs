@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace BookStore.UnitOfWork
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork: IDisposable
     {
         IBookRepository BookRepository { get; }
-        BookStoreContext Context { get; }
         //IGenericRepository<Post> PostRepository { get; }
         void Save();
+        Task<int> SaveAsync();
     }
 }

@@ -4,40 +4,45 @@ using System.Linq;
 using System.Threading.Tasks;
 using BookStore.Models;
 using BookStore.UnitOfWork;
-
+using Microsoft.EntityFrameworkCore;
 namespace BookStore.Repositories
 {
     public class BookRepository : IBookRepository
     {
         //private readonly Book
+        protected readonly BookStoreContext Context;
+
         public BookRepository(BookStoreContext context)
-        {   
-
-        }
-        public IEnumerable<Book> GetAll()
         {
-            throw new NotImplementedException();
-            //return table.ToList();
+            Context = context;
         }
-        public Book GetById(int id)
+        public Task<List<Book>> GetAll()
         {
-            //return table.Find(id);
-            throw new NotImplementedException();
-
+            return Context.Books.Include(b=>b.Category.ParentCategory).Include(b=>b.Category.SubCategory).ToListAsync();
+        }
+        public Task<Book> GetById(int id)
+        {
+            return Context.Books.Include(b => b.Category.ParentCategory).Include(b => b.Category.SubCategory).SingleOrDefaultAsync(i => i.Id == id);
         }
         public void Insert(Book book)
         {
-            //table.Add(book);
+            Context.Books.Add(book);
         }
         public void Update(Book book)
         {
-            //table.Attach(book);
             //_context.Entry(book).State = EntityState.Modified;
+            Context.Books.Update(book);
+        }
+        public void LoadBookCategory(Book book)
+        {
+            Context.Entry(book).Reference(b => b.Category).Load();
+            Context.Entry(book.Category).Reference(c => c.SubCategory).Load();
+            Context.Entry(book.Category).Reference(c => c.ParentCategory).Load();
         }
         public void Delete(int id)
         {
-            //Book existing = table.Find(id);
-            //table.Remove(existing);
+            Book existing = Context.Books.Find(id);
+            Context.Books.Remove(existing);
         }
  
        

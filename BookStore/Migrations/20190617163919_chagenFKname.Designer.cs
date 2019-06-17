@@ -2,15 +2,17 @@
 using BookStore.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace BookStore.Migrations
 {
     [DbContext(typeof(BookStoreContext))]
-    partial class BookStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20190617163919_chagenFKname")]
+    partial class chagenFKname
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,9 +63,10 @@ namespace BookStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("CategoryId", "ParentCategoryId");
-
                     b.HasIndex("ParentCategoryId");
+
+                    b.HasIndex("CategoryId", "ParentCategoryId")
+                        .IsUnique();
 
                     b.ToTable("CategoriesParents");
                 });
@@ -78,7 +81,7 @@ namespace BookStore.Migrations
 
             modelBuilder.Entity("BookStore.Models.CategoryParent", b =>
                 {
-                    b.HasOne("BookStore.Models.Category", "SubCategory")
+                    b.HasOne("BookStore.Models.Category", "Category")
                         .WithMany("subCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);

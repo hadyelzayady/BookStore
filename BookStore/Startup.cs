@@ -30,7 +30,7 @@ namespace BookStore
         {
             services.AddEntityFrameworkNpgsql()
                .AddDbContext<BookStoreContext>();
-            //services.addE
+            services.AddScoped<IUnitOfWork>(provider => new UnitOfWork.UnitOfWork(new BookStoreContext()));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
